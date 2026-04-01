@@ -12,6 +12,8 @@ import {
 
 const DEFAULT_BASE_URL = "https://lanhuapp.com";
 const DEFAULT_DDS_BASE_URL = "https://dds.lanhuapp.com";
+const DEFAULT_TIMEOUT_MS = 30_000;
+const CDN_TIMEOUT_MS = 60_000;
 
 type RequestParamValue = string | number | boolean | null | undefined;
 
@@ -63,6 +65,7 @@ export function createLanhuFetch(options: {
     return fetchImpl(input as string | URL | Request, {
       ...init,
       headers,
+      signal: init?.signal ?? AbortSignal.timeout(CDN_TIMEOUT_MS),
     });
   };
 }
@@ -207,7 +210,7 @@ export class LanhuClient {
     return payload as T;
   }
 
-  async getJson<T>(resource: string, options: { dds?: boolean; params?: RequestParams } = {}): Promise<T> {
+  async getJson<T>(resource: string, options: { dds?: boolean; params?: RequestParams; timeoutMs?: number } = {}): Promise<T> {
     return this.requestJson<T>(resource, options);
   }
 
@@ -266,11 +269,12 @@ export class LanhuClient {
 
   private async requestJson<T>(
     resource: string,
-    options: { params?: RequestParams; dds?: boolean } = {},
+    options: { params?: RequestParams; dds?: boolean; timeoutMs?: number } = {},
   ): Promise<T> {
     const url = this.toUrl(resource, options.params, options.dds);
     const response = await this.fetchImpl(url, {
       headers: options.dds ? buildDdsHeaders(this.ddsCookie) : buildBaseHeaders(this.cookie),
+      signal: AbortSignal.timeout(options.timeoutMs ?? DEFAULT_TIMEOUT_MS),
     });
 
     if (!response.ok) {

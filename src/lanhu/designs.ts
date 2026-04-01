@@ -333,7 +333,7 @@ export async function getDesignSchemaJson(
     throw new Error("store_schema_revise did not return data_resource_url");
   }
 
-  const schema = await client.getJson<UnknownRecord>(schemaUrl, { dds: true });
+  const schema = await client.getJson<UnknownRecord>(schemaUrl, { dds: true, timeoutMs: 60_000 });
   if (!isRecord(schema)) {
     throw new Error("Schema JSON payload is not an object");
   }
@@ -360,7 +360,7 @@ export async function getSketchJson(
     throw new Error(`Design ${imageId} is missing versions[0].json_url`);
   }
 
-  const sketch = await client.getJson<UnknownRecord>(jsonUrl);
+  const sketch = await client.getJson<UnknownRecord>(jsonUrl, { timeoutMs: 60_000 });
   if (!isRecord(sketch)) {
     throw new Error("Sketch JSON payload is not an object");
   }
