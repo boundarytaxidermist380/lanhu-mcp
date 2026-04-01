@@ -1,5 +1,5 @@
 {
-  "name": "lanhu-mcp",
+  "name": "mcp-lanhu",
   "version": "1.0.0",
   "description": "MCP server for Lanhu (蓝湖) design collaboration platform — lets AI assistants read designs, PRDs and slices.",
   "type": "module",
@@ -14,7 +14,7 @@
     "node": ">=20"
   },
   "bin": {
-    "lanhu-mcp": "dist/server.js"
+    "mcp-lanhu": "dist/server.js"
   },
   "files": [
     "dist",

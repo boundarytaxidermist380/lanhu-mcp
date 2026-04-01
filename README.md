@@ -4,7 +4,7 @@
 
 **让 AI 编程工具直接读取蓝湖设计稿和需求文档**
 
-[![npm](https://img.shields.io/npm/v/lanhu-mcp)](https://www.npmjs.com/package/lanhu-mcp)
+[![npm](https://img.shields.io/npm/v/mcp-lanhu)](https://www.npmjs.com/package/mcp-lanhu)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Node.js 20+](https://img.shields.io/badge/node-20+-339933.svg)](https://nodejs.org/)
 
@@ -35,7 +35,7 @@
   "mcpServers": {
     "lanhu": {
       "command": "npx",
-      "args": ["-y", "lanhu-mcp"],
+      "args": ["-y", "mcp-lanhu"],
       "env": {
         "LANHU_COOKIE": "你的蓝湖Cookie"
       }
