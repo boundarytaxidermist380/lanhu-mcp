@@ -9,10 +9,11 @@
 
 </div>
 
-## 使用
+## 安装
 
-1. 登录 [蓝湖](https://lanhuapp.com)，F12 复制 Cookie
-2. 添加到 `.cursor/mcp.json`：
+无需 clone 代码，直接在 AI 客户端配置中使用 `npx` 自动安装运行。
+
+**Cursor / Windsurf**：编辑 `.cursor/mcp.json`
 
 ```json
 {
@@ -26,7 +27,15 @@
 }
 ```
 
-3. 重启客户端，对话中发蓝湖链接即可
+**Claude Code**：
+
+```bash
+claude mcp add lanhu -- npx -y mcp-lanhu
+```
+
+> Cookie 获取：登录 [蓝湖](https://lanhuapp.com) → F12 → Network → 复制任意请求的 Cookie
+
+重启客户端后，对话中发蓝湖链接即可使用。
 
 ## 功能
 
