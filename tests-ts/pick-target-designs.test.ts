@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { parseLanhuUrl } from "../src/lanhu/client.js";
-import { pickTargetDesigns } from "../src/tools/analyze-designs.js";
+import { pickTargetDesigns } from "../src/tools/design.js";
 import type { LanhuDesignSummary } from "../src/shared/types.js";
 
 function makeDesign(overrides: Partial<LanhuDesignSummary> & { id: string; name: string; index: number }): LanhuDesignSummary {
