@@ -34,3 +34,4 @@ venv/
 .coverage
 htmlcov/
 uv.lock
+docs/superpowers/
