@@ -175,7 +175,7 @@ export function extractDesignTokens(sketch: UnknownRecord): string {
   const collectColor = (colorObj: unknown): void => {
     if (!isRecord(colorObj)) return;
     const v = asString(colorObj.value);
-    if (v) addTo(colors, v);
+    if (v && !v.includes("undefined") && !v.includes("NaN")) addTo(colors, v);
   };
 
   const collectFont = (fontObj: unknown): void => {
