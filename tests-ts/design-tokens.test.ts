@@ -1,0 +1,133 @@
+import { describe, expect, it } from "vitest";
+import { extractDesignTokens, extractLayerTree } from "../src/transform/design-tokens.js";
+
+const artboardSketch = {
+  artboard: {
+    name: "首页",
+    frame: { width: 375, height: 812 },
+    layers: [
+      {
+        type: "textLayer",
+        name: "标题",
+        visible: true,
+        frame: { x: 16, y: 50, width: 200, height: 24 },
+        style: {
+          fills: [
+            { color: { r: 38, g: 38, b: 38, a: 1, value: "rgba(38,38,38,1)" }, isEnabled: true },
+          ],
+          borders: [],
+          shadows: [],
+        },
+        text: {
+          value: "首页标题",
+          style: {
+            color: { r: 38, g: 38, b: 38, a: 1, value: "rgba(38,38,38,1)" },
+            font: {
+              postScriptName: "PingFang SC-Medium",
+              name: "PingFang SC",
+              type: "Medium",
+              size: 18,
+              bold: false,
+              italic: false,
+              lineHeight: { value: 24, unit: "pixels" },
+              letterSpacing: { value: 0, unit: "pixels" },
+            },
+          },
+        },
+      },
+      {
+        type: "textLayer",
+        name: "副标题",
+        visible: true,
+        frame: { x: 16, y: 80, width: 200, height: 18 },
+        style: {
+          fills: [
+            { color: { r: 140, g: 140, b: 140, a: 1, value: "rgba(140,140,140,1)" }, isEnabled: true },
+          ],
+          borders: [],
+          shadows: [],
+        },
+        text: {
+          value: "副标题文字",
+          style: {
+            color: { r: 140, g: 140, b: 140, a: 1, value: "rgba(140,140,140,1)" },
+            font: {
+              postScriptName: "PingFang SC-Regular",
+              name: "PingFang SC",
+              type: "Regular",
+              size: 14,
+              bold: false,
+              italic: false,
+              lineHeight: { value: 18, unit: "pixels" },
+              letterSpacing: { value: 0, unit: "pixels" },
+            },
+          },
+        },
+      },
+      {
+        type: "shapeLayer",
+        name: "卡片背景",
+        visible: true,
+        frame: { x: 16, y: 120, width: 343, height: 200 },
+        style: {
+          fills: [{ color: { r: 255, g: 255, b: 255, a: 1, value: "rgba(255,255,255,1)" }, isEnabled: true }],
+          borders: [{ color: { r: 230, g: 230, b: 230, a: 1, value: "rgba(230,230,230,1)" }, isEnabled: true, thickness: 1 }],
+          shadows: [{ color: { r: 0, g: 0, b: 0, a: 0.08, value: "rgba(0,0,0,0.08)" }, isEnabled: true, offsetX: 0, offsetY: 2, blurRadius: 8, spread: 0 }],
+        },
+        radius: [8, 8, 8, 8],
+        layers: [],
+      },
+    ],
+  },
+};
+
+describe("extractDesignTokens (refactored)", () => {
+  it("extracts font tokens from artboard text layers", () => {
+    const tokens = extractDesignTokens(artboardSketch);
+    expect(tokens).toContain("Fonts");
+    expect(tokens).toContain("PingFang SC");
+    expect(tokens).toContain("18px");
+    expect(tokens).toContain("14px");
+  });
+
+  it("extracts color tokens from fills", () => {
+    const tokens = extractDesignTokens(artboardSketch);
+    expect(tokens).toContain("Colors");
+    expect(tokens).toContain("rgba(38,38,38,1)");
+    expect(tokens).toContain("rgba(140,140,140,1)");
+    expect(tokens).toContain("rgba(255,255,255,1)");
+  });
+
+  it("extracts shadow tokens", () => {
+    const tokens = extractDesignTokens(artboardSketch);
+    expect(tokens).toContain("Shadows");
+    expect(tokens).toContain("rgba(0,0,0,0.08)");
+  });
+
+  it("extracts border radius tokens", () => {
+    const tokens = extractDesignTokens(artboardSketch);
+    expect(tokens).toContain("Border Radius");
+    expect(tokens).toContain("8px");
+  });
+
+  it("extracts border tokens", () => {
+    const tokens = extractDesignTokens(artboardSketch);
+    expect(tokens).toContain("Borders");
+    expect(tokens).toContain("rgba(230,230,230,1)");
+  });
+
+  it("returns empty string for empty sketch", () => {
+    const tokens = extractDesignTokens({});
+    expect(tokens).toBe("");
+  });
+});
+
+describe("extractLayerTree (unchanged)", () => {
+  it("still works with artboard format", () => {
+    const tree = extractLayerTree(artboardSketch);
+    expect(tree).toContain("Artboard: 首页");
+    expect(tree).toContain("textLayer: 标题");
+    expect(tree).toContain("textLayer: 副标题");
+    expect(tree).toContain("shapeLayer: 卡片背景");
+  });
+});

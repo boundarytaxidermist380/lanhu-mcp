@@ -161,78 +161,136 @@ export function extractLayerTree(sketch: UnknownRecord, maxDepth = 4): string {
 }
 
 export function extractDesignTokens(sketch: UnknownRecord): string {
-  const tokens: string[] = [];
+  const colors = new Map<string, number>();
+  const fonts = new Map<string, number>();
+  const gradients = new Map<string, number>();
+  const shadows = new Map<string, number>();
+  const radii = new Map<string, number>();
+  const borders = new Map<string, number>();
 
-  const walk = (obj: UnknownRecord, parentPath = ""): void => {
-    if (obj.isVisible === false) {
-      return;
-    }
-    const name = asString(obj.name);
-    const currentPath = parentPath ? `${parentPath}/${name}` : name;
-    const dims = getDimensions(obj);
-    if (dims.w < 2 && dims.h < 2) {
-      return;
-    }
-
-    const lines: string[] = [];
-    const fills = Array.isArray(obj.fills) ? obj.fills.filter(isRecord) : [];
-    const borders = Array.isArray(obj.borders) ? obj.borders.filter(isRecord) : [];
-    const shadows = Array.isArray(obj.shadows) ? obj.shadows.filter(isRecord) : [];
-    const radius = obj.radius;
-    const opacity = typeof obj.opacity === "number" ? obj.opacity : undefined;
-
-    const hasGradient = fills.some((fill) => asNumber(fill.fillType) === 1 && fill.isEnabled !== false);
-    const hasBorder = borders.some((border) => border.isEnabled !== false);
-    const hasShadow = shadows.some((shadow) => shadow.isEnabled !== false);
-    const unevenRadius = Array.isArray(radius) && new Set(radius).size > 1;
-    const reducedOpacity = opacity != null && opacity < 100;
-
-    if (!(hasGradient || hasBorder || hasShadow || unevenRadius || reducedOpacity)) {
-      const children = Array.isArray(obj.layers) ? obj.layers.filter(isRecord) : [];
-      for (const child of children) {
-        walk(child, currentPath);
-      }
-      return;
-    }
-
-    lines.push(`[${asString(obj.type) || asString(obj.ddsType) || "unknown"}] "${name}" @(${Math.round(dims.x)},${Math.round(dims.y)}) ${Math.round(dims.w)}x${Math.round(dims.h)}${parentPath ? `  path: ${currentPath}` : ""}`);
-
-    if (radius != null) {
-      lines.push(`  radius: ${Array.isArray(radius) ? JSON.stringify(radius) : String(radius)}`);
-    }
-    for (const fill of fills) {
-      const simplified = simplifyFill(fill);
-      if (simplified) lines.push(`  fill: ${simplified}`);
-    }
-    for (const border of borders) {
-      const simplified = simplifyBorder(border);
-      if (simplified) lines.push(`  border: ${simplified}`);
-    }
-    if (reducedOpacity) {
-      lines.push(`  opacity: ${opacity}%`);
-    }
-    for (const shadow of shadows) {
-      const simplified = simplifyShadow(shadow);
-      if (simplified) lines.push(`  shadow: ${simplified}`);
-    }
-    tokens.push(lines.join("\n"));
-
-    const children = Array.isArray(obj.layers) ? obj.layers.filter(isRecord) : [];
-    for (const child of children) {
-      walk(child, currentPath);
-    }
+  const addTo = (map: Map<string, number>, key: string): void => {
+    map.set(key, (map.get(key) ?? 0) + 1);
   };
 
+  const collectColor = (colorObj: unknown): void => {
+    if (!isRecord(colorObj)) return;
+    const v = asString(colorObj.value);
+    if (v) addTo(colors, v);
+  };
+
+  const collectFont = (fontObj: unknown): void => {
+    if (!isRecord(fontObj)) return;
+    const name = asString(fontObj.name);
+    const type = asString(fontObj.type);
+    const size = asNumber(fontObj.size);
+    if (!name && !size) return;
+    const parts: string[] = [];
+    if (name) parts.push(name);
+    if (type) parts.push(type);
+    if (size) parts.push(`${size}px`);
+    addTo(fonts, parts.join(" / "));
+  };
+
+  const walk = (layer: UnknownRecord): void => {
+    if (layer.visible === false || layer.isVisible === false) return;
+
+    const style = isRecord(layer.style) ? layer.style : {};
+    const fills = Array.isArray(style.fills) ? style.fills.filter(isRecord) : [];
+    const borderList = Array.isArray(style.borders) ? style.borders.filter(isRecord) : [];
+    const shadowList = Array.isArray(style.shadows) ? style.shadows.filter(isRecord) : [];
+
+    // Collect fill colors and gradients
+    for (const fill of fills) {
+      if (fill.isEnabled === false) continue;
+      const fillType = asNumber(fill.fillType);
+      if (fillType === 1) {
+        const simplified = simplifyFill(fill);
+        if (simplified) addTo(gradients, simplified);
+      } else {
+        if (isRecord(fill.color)) collectColor(fill.color);
+      }
+    }
+
+    // Collect border colors
+    for (const border of borderList) {
+      if (border.isEnabled === false) continue;
+      const simplified = simplifyBorder(border);
+      if (simplified) addTo(borders, simplified);
+    }
+
+    // Collect shadow tokens
+    for (const shadow of shadowList) {
+      if (shadow.isEnabled === false) continue;
+      const simplified = simplifyShadow(shadow);
+      if (simplified) addTo(shadows, simplified);
+    }
+
+    // Collect border radius
+    if (Array.isArray(layer.radius) && layer.radius.length > 0) {
+      const vals = (layer.radius as unknown[]).map((v) => asNumber(v));
+      const unique = [...new Set(vals)];
+      if (unique.length === 1) {
+        if (unique[0] !== 0) addTo(radii, `${unique[0]}px`);
+      } else {
+        addTo(radii, vals.map((v) => `${v}px`).join(" "));
+      }
+    } else if (typeof layer.radius === "number" && layer.radius !== 0) {
+      addTo(radii, `${layer.radius}px`);
+    }
+
+    // Collect font and text color from artboard textLayer format
+    if (asString(layer.type) === "textLayer") {
+      const text = isRecord(layer.text) ? layer.text : {};
+      const textStyle = isRecord(text.style) ? text.style : {};
+      if (isRecord(textStyle.color)) collectColor(textStyle.color);
+      if (isRecord(textStyle.font)) collectFont(textStyle.font);
+
+      // Board format: textInfo array
+      const textInfoList = Array.isArray(layer.textInfo) ? layer.textInfo.filter(isRecord) : [];
+      for (const ti of textInfoList) {
+        if (isRecord(ti.color)) collectColor(ti.color);
+        if (isRecord(ti.font)) collectFont(ti.font);
+      }
+    }
+
+    const children = Array.isArray(layer.layers) ? layer.layers.filter(isRecord) : [];
+    for (const child of children) walk(child);
+  };
+
+  // Entry points: artboard.layers, board.layers, info[]
   const artboard = isRecord(sketch.artboard) ? sketch.artboard : undefined;
+  const board = isRecord(sketch.board) ? sketch.board : undefined;
   if (artboard && Array.isArray(artboard.layers)) {
-    for (const layer of artboard.layers.filter(isRecord)) {
-      walk(layer);
-    }
-  } else if (Array.isArray(sketch.info)) {
-    for (const item of sketch.info.filter(isRecord)) {
-      walk(item);
-    }
+    for (const layer of artboard.layers.filter(isRecord)) walk(layer);
+  }
+  if (board && Array.isArray(board.layers)) {
+    for (const layer of board.layers.filter(isRecord)) walk(layer);
+  }
+  if (Array.isArray(sketch.info)) {
+    for (const item of sketch.info.filter(isRecord)) walk(item);
   }
 
-  return tokens.join("\n\n");
+  const sortedEntries = (map: Map<string, number>): [string, number][] =>
+    [...map.entries()].sort((a, b) => b[1] - a[1]);
+
+  const formatSection = (title: string, map: Map<string, number>): string => {
+    if (map.size === 0) return "";
+    const lines = [`${title} (${map.size} unique):`];
+    for (const [key, count] of sortedEntries(map)) {
+      lines.push(`  ${key} x${count}`);
+    }
+    return lines.join("\n");
+  };
+
+  const sections = [
+    formatSection("Colors", colors),
+    formatSection("Fonts", fonts),
+    formatSection("Gradients", gradients),
+    formatSection("Shadows", shadows),
+    formatSection("Borders", borders),
+    formatSection("Border Radius", radii),
+  ].filter(Boolean);
+
+  if (sections.length === 0) return "";
+  return `=== Design Tokens ===\n\n${sections.join("\n\n")}`;
 }
