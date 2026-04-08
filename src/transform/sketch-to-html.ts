@@ -175,14 +175,18 @@ function flattenArtboardLayers(rawLayers: unknown[], scale: number): FlatLayer[]
       return;
     }
 
+    // Artboard layers use frame.left/top or frame.x/y for coordinates
+    const frameX = frame.left ?? frame.x ?? 0;
+    const frameY = frame.top ?? frame.y ?? 0;
+
     const ltype = String(layer.type ?? "");
     if (ltype === "groupLayer" || ltype === "symbolInstence") {
       const imageData = isRecord(layer.image) ? layer.image : {};
       if (imageData.imageUrl || imageData.svgUrl) {
         result.push({
           ...layer,
-          left: frame.x ?? 0,
-          top: frame.y ?? 0,
+          left: frameX,
+          top: frameY,
           width: frame.width ?? 0,
           height: frame.height ?? 0,
           __visible: true,
@@ -200,8 +204,8 @@ function flattenArtboardLayers(rawLayers: unknown[], scale: number): FlatLayer[]
 
     const mapped: UnknownRecord = {
       ...layer,
-      left: frame.x ?? 0,
-      top: frame.y ?? 0,
+      left: frameX,
+      top: frameY,
       width: frame.width ?? 0,
       height: frame.height ?? 0,
       __visible: true,

@@ -303,8 +303,8 @@ export function extractFullAnnotationsFromSketch(
         : {};
     const w = Number(frame.width ?? 0) || 0;
     const h = Number(frame.height ?? 0) || 0;
-    const left = Number(frame.x ?? 0) || 0;
-    const top = Number(frame.y ?? 0) || 0;
+    const left = Number(frame.left ?? frame.x ?? 0) || 0;
+    const top = Number(frame.top ?? frame.y ?? 0) || 0;
     const currentPath = parentPath ? `${parentPath}/${name}` : name;
 
     if (w === 0 && h === 0) {
