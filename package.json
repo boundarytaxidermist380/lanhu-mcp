@@ -1,6 +1,6 @@
 {
   "name": "mcp-lanhu",
-  "version": "1.0.2",
+  "version": "2.0.0",
   "description": "MCP server for Lanhu (蓝湖) design collaboration platform — lets AI assistants read designs, PRDs and slices.",
   "type": "module",
   "license": "MIT",
