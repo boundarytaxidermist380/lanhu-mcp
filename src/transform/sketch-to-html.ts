@@ -159,6 +159,79 @@ function flattenLayers(rawLayers: unknown[], scale: number): FlatLayer[] {
   return result;
 }
 
+function flattenArtboardLayers(rawLayers: unknown[], scale: number): FlatLayer[] {
+  const result: FlatLayer[] = [];
+
+  const flatten = (layer: unknown): void => {
+    if (!isRecord(layer)) return;
+    if (layer.visible === false || layer.isVisible === false) return;
+
+    const frame = isRecord(layer.frame) ? layer.frame : {};
+    const w = Number(frame.width ?? 0) || 0;
+    const h = Number(frame.height ?? 0) || 0;
+    if (w === 0 && h === 0) {
+      const children = Array.isArray(layer.layers) ? layer.layers : [];
+      for (let i = children.length - 1; i >= 0; i--) flatten(children[i]);
+      return;
+    }
+
+    const ltype = String(layer.type ?? "");
+    if (ltype === "groupLayer" || ltype === "symbolInstence") {
+      const imageData = isRecord(layer.image) ? layer.image : {};
+      if (imageData.imageUrl || imageData.svgUrl) {
+        result.push({
+          ...layer,
+          left: frame.x ?? 0,
+          top: frame.y ?? 0,
+          width: frame.width ?? 0,
+          height: frame.height ?? 0,
+          __visible: true,
+        } as FlatLayer);
+      } else {
+        const children = Array.isArray(layer.layers) ? layer.layers : [];
+        for (let i = children.length - 1; i >= 0; i--) flatten(children[i]);
+      }
+      return;
+    }
+
+    const textObj = isRecord(layer.text) ? layer.text : {};
+    const textStyle = isRecord(textObj.style) ? textObj.style : {};
+    const fontObj = isRecord(textStyle.font) ? textStyle.font : {};
+
+    const mapped: UnknownRecord = {
+      ...layer,
+      left: frame.x ?? 0,
+      top: frame.y ?? 0,
+      width: frame.width ?? 0,
+      height: frame.height ?? 0,
+      __visible: true,
+    };
+
+    if (ltype === "textLayer" && Object.keys(fontObj).length > 0) {
+      const colorObj = isRecord(textStyle.color) ? textStyle.color : {};
+      mapped.textInfo = {
+        text: String(textObj.value ?? ""),
+        color: Object.keys(colorObj).length > 0 ? colorObj : undefined,
+        size: fontObj.size ?? 0,
+        fontPostScriptName: fontObj.name ?? fontObj.postScriptName,
+        fontName: fontObj.name,
+        fontStyleName: fontObj.type ?? "",
+        bold: fontObj.bold ?? false,
+        italic: fontObj.italic ?? false,
+        justification: fontObj.align ?? "left",
+        leading: isRecord(fontObj.lineHeight) ? fontObj.lineHeight.value : fontObj.lineHeight,
+      };
+    }
+
+    result.push(mapped as FlatLayer);
+  };
+
+  for (let i = rawLayers.length - 1; i >= 0; i--) {
+    flatten(rawLayers[i]);
+  }
+  return result;
+}
+
 export function convertSketchToHtml(
   sketchData: UnknownRecord,
   designScale = 2.0,
@@ -176,6 +249,13 @@ export function convertSketchToHtml(
     boardH = px(board.height ?? 1334, scale);
     const rawLayers = Array.isArray(board.layers) ? board.layers : [];
     layers = flattenLayers(rawLayers, scale);
+  } else if (isRecord(sketchData.artboard)) {
+    const artboard = sketchData.artboard;
+    const frame = isRecord(artboard.frame) ? artboard.frame : {};
+    boardW = px(frame.width ?? 750, scale);
+    boardH = px(frame.height ?? 1334, scale);
+    const rawLayers = Array.isArray(artboard.layers) ? artboard.layers : [];
+    layers = flattenArtboardLayers(rawLayers, scale);
   }
 
   const cssRules: string[] = [];

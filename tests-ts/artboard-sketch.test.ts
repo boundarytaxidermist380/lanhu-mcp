@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { extractFullAnnotationsFromSketch } from "../src/transform/sketch-annotations.js";
+import { convertSketchToHtml } from "../src/transform/sketch-to-html.js";
 
 const artboardSketch = {
   device: "iPhone 12 @2x",
@@ -102,5 +103,35 @@ describe("artboard sketch annotations", () => {
   it("extracts text color from text.style.color", () => {
     const annotations = extractFullAnnotationsFromSketch(artboardSketch, 2.0);
     expect(annotations).toContain("rgba(140,140,140,1)");
+  });
+});
+
+describe("artboard sketch-to-html", () => {
+  it("produces HTML from artboard format sketch", () => {
+    const result = convertSketchToHtml(artboardSketch, 2.0);
+    expect(result.html).toContain("<!DOCTYPE html>");
+    expect(result.html).toContain("当前地区总采样：14次");
+    expect(result.html).toContain("首页");
+  });
+
+  it("extracts font CSS from artboard text layers", () => {
+    const result = convertSketchToHtml(artboardSketch, 2.0);
+    expect(result.html).toContain("font-size:7px");
+    expect(result.html).toContain('font-family:"PingFang SC"');
+  });
+
+  it("sets correct board dimensions from artboard.frame", () => {
+    const result = convertSketchToHtml(artboardSketch, 2.0);
+    expect(result.html).toContain("width:187.5px");
+    expect(result.html).toContain("height:406px");
+  });
+
+  it("generates layer annotations for artboard layers", () => {
+    const result = convertSketchToHtml(artboardSketch, 2.0);
+    expect(result.layerAnnotations.length).toBe(2);
+    const textAnnot = result.layerAnnotations.find((a) => a.name === "当前地区总采样");
+    expect(textAnnot).toBeDefined();
+    expect(textAnnot!.text).toBe("当前地区总采样：14次");
+    expect(textAnnot!.css["font-size"]).toBe("7px");
   });
 });
