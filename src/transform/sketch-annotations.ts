@@ -320,16 +320,18 @@ export function extractFullAnnotationsFromSketch(
     if (ltype === "textLayer") {
       const textObj = isRecord(layer.text) ? layer.text : {};
       const text = String(textObj.value ?? "");
-      const ts = isRecord(layer.textStyle) ? layer.textStyle : {};
+      const ts = isRecord(textObj.style) ? textObj.style : {};
       const fontObj = isRecord(ts.font) ? ts.font : {};
       const colorObj = isRecord(ts.color) ? ts.color : {};
-      const size = Number(fontObj.size ?? ts.fontSize ?? 0);
-      const font = String(fontObj.name ?? ts.fontFamily ?? fontObj.family ?? "");
-      const bold = Boolean(ts.fontWeight === "bold" || (typeof ts.fontWeight === "number" && ts.fontWeight >= 600));
-      const italic = Boolean(ts.fontStyle === "italic" || ts.italic);
-      const justify = String(ts.textAlign ?? ts.alignment ?? "left");
-      const leading = ts.lineHeight ?? ts.leading;
-      const tracking = ts.letterSpacing ?? ts.tracking;
+      const size = Number(fontObj.size ?? 0);
+      const font = String(fontObj.name ?? fontObj.postScriptName ?? "");
+      const bold = Boolean(fontObj.bold || fontObj.type === "Bold");
+      const italic = Boolean(fontObj.italic);
+      const justify = String(fontObj.align ?? "left");
+      const lineHeightObj = fontObj.lineHeight;
+      const leading = isRecord(lineHeightObj) ? lineHeightObj.value : lineHeightObj;
+      const letterSpacingObj = fontObj.letterSpacing;
+      const tracking = isRecord(letterSpacingObj) ? letterSpacingObj.value : letterSpacingObj;
 
       const entry: TextEntry = {
         name,
