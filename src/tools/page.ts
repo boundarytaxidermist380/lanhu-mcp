@@ -1,3 +1,4 @@
+// src/tools/page.ts
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { mkdir } from "node:fs/promises";
 import path from "node:path";
@@ -12,43 +13,57 @@ import {
   parseLanhuPageUrl,
 } from "../lanhu/pages.js";
 import { createToolResult } from "../shared/errors.js";
+import type { JsonObject } from "../shared/types.js";
 
-export function registerAnalyzePagesTool(server: McpServer): void {
+export function registerPageTool(server: McpServer): void {
   server.registerTool(
-    "lanhu_analyze_pages",
+    "lanhu_page",
     {
       description:
-        "Analyze Lanhu PRD/Axure pages with the current static extraction route. Skeleton only for the TS rewrite stage.",
+        "Unified Lanhu PRD/prototype tool. Supports listing and analyzing pages.\n\n" +
+        "Modes:\n" +
+        "  - list: List all pages in a PRD/prototype document\n" +
+        "  - analyze: Analyze specified pages (default)\n",
       inputSchema: {
-        url: z
-          .string()
-          .min(1)
-          .describe(
-            "Lanhu project URL with docId (PRD/prototype). Example: https://lanhuapp.com/web/#/item/project/product?tid=xxx&pid=xxx&docId=xxx",
-          ),
-        page_names: z
-          .union([z.string(), z.array(z.string())])
-          .describe(
-            "Page name(s) to analyze. Use 'all' for all pages, single name like '退款流程', or list like ['退款流程', '用户中心']. Get exact names from lanhu_list_pages first!",
-          ),
-        mode: z
-          .enum(["text_only", "full"])
-          .default("full")
-          .describe("Analysis mode: 'text_only' or 'full'. Default: 'full'."),
-        analysis_mode: z
-          .enum(["developer", "tester", "explorer"])
-          .default("developer")
-          .describe(
-            "Analysis perspective: 'developer' (detailed for coding), 'tester' (test scenarios/validation), 'explorer' (quick overview for review).",
-          ),
+        url: z.string().min(1).describe(
+          "Lanhu project URL with docId (PRD/prototype). Example: https://lanhuapp.com/web/#/item/project/product?tid=xxx&pid=xxx&docId=xxx",
+        ),
+        mode: z.enum(["list", "analyze"]).default("analyze").describe(
+          "Operation mode. Default: analyze.",
+        ),
+        page_names: z.union([z.string(), z.array(z.string())]).optional().describe(
+          "Page name(s) to analyze. Use 'all' for all pages. Required for analyze mode.",
+        ),
+        analysis_mode: z.enum(["developer", "tester", "explorer"]).default("developer").describe(
+          "Analysis perspective. Default: developer.",
+        ),
       },
     },
-    async ({ url, page_names, mode, analysis_mode }) => {
+    async ({ url, mode, page_names, analysis_mode }) => {
       try {
         const fetchImpl = createLanhuFetch({
           cookie: config.lanhuCookie,
           ddsCookie: config.ddsCookie,
         });
+
+        // === LIST MODE ===
+        if (mode === "list") {
+          const result = await listPages(fetchImpl, url);
+          return createToolResult(
+            `Loaded ${result.total_pages} prototype page(s) from ${result.document_name}.`,
+            result as unknown as JsonObject,
+          );
+        }
+
+        // === ANALYZE MODE ===
+        if (!page_names) {
+          return createToolResult(
+            "page_names is required for analyze mode.",
+            { status: "error", hint: "Pass page_names='all' or specific page names." },
+            true,
+          );
+        }
+
         const params = parseLanhuPageUrl(url);
         const resourceDir = path.join(config.dataDir, `axure_extract_${(params.doc_id ?? "unknown").slice(0, 8)}`);
         await mkdir(resourceDir, { recursive: true });
@@ -69,7 +84,6 @@ export function registerAnalyzePagesTool(server: McpServer): void {
         const successful = results.filter((item) => item.success);
 
         const summaryText = [
-          `Mode: ${mode}`,
           `Perspective: ${analysis_mode}`,
           `Document: ${pagesResult.document_name}`,
           `Requested pages: ${targetPages.length}`,
@@ -81,17 +95,16 @@ export function registerAnalyzePagesTool(server: McpServer): void {
           summaryText,
           {
             status: "success",
-            mode,
             analysis_mode,
             document: pagesResult,
             download: downloadResult,
             results,
-          } as unknown as import("../shared/types.js").JsonObject,
+          } as unknown as JsonObject,
         );
       } catch (error) {
         return createToolResult(
-          `Failed to analyze prototype pages: ${error instanceof Error ? error.message : String(error)}`,
-          { status: "error", url, mode, analysis_mode },
+          `Failed to analyze pages: ${error instanceof Error ? error.message : String(error)}`,
+          { status: "error", url },
           true,
         );
       }
