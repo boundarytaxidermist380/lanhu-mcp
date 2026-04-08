@@ -53,7 +53,19 @@
 
 ## 安装 / Quick Start
 
-无需 clone 代码，直接在 AI 客户端配置中使用 `npx` 自动安装运行。
+### 最快方式：让 AI 帮你装
+
+复制下面这段话，直接发给你的 AI 助手（Cursor / Claude Code / Windsurf）：
+
+> 帮我安装蓝湖 MCP 服务器：https://github.com/MrDgbot/lanhu-mcp
+
+AI 会自动读取仓库说明并完成配置。你只需要提供蓝湖 Cookie 就行。
+
+---
+
+### 手动配置
+
+如果你更喜欢手动操作，以下是各客户端的配置方式。无需 clone 代码，`npx` 会自动安装。
 
 ### Cursor / Windsurf
 

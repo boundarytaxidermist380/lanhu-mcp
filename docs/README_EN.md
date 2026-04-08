@@ -63,6 +63,18 @@ A powerful [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) serv
 
 ## 🚀 Quick Start
 
+### Fastest Way: Let AI Install It
+
+Copy this and send it to your AI assistant (Cursor / Claude Code / Windsurf):
+
+> Install the Lanhu MCP server for me: https://github.com/MrDgbot/lanhu-mcp
+
+The AI will read the repo and configure everything automatically. You just need to provide your Lanhu Cookie.
+
+---
+
+### Manual Setup
+
 ### Prerequisites
 
 - **Node.js 20+** (required)
