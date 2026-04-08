@@ -7,66 +7,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### 🎉 Initial Release Features
-
-#### ✨ Added
-- **需求文档分析**
-  - 支持 Axure 原型自动提取和解析
-  - 三种分析模式：开发视角、测试视角、快速探索
-  - 四阶段工作流（全局扫描 → 分组分析 → 反向验证 → 生成交付物）
-  - 智能缓存机制（基于文档版本号）
-  - 页面截图和文本提取
-
-- **UI 设计支持**
-  - UI 设计图批量下载和展示
-  - 切图自动识别和导出
-  - 智能文件命名（基于图层路径）
-  - 设计元数据提取（颜色、透明度、阴影等）
-
-- **性能优化**
-  - 基于版本号的永久缓存
-  - 增量资源更新
-  - 并发下载和处理
-  - 智能文件完整性检查
-
-- **安全机制**
-  - Cookie 环境变量配置
-  - 用户身份识别（从 URL 参数）
-  - 角色归一化映射
-
-#### 📖 Documentation
-- 详细的中英文 README
-- 贡献指南（CONTRIBUTING.md）
-- MIT 开源许可证
-- Docker 部署支持
-
-#### 🛠️ Infrastructure
-- FastMCP 框架集成
-- Playwright 浏览器自动化
-- HTTPx 异步 HTTP 客户端
-- BeautifulSoup HTML 解析
-
 ---
 
-## Future Roadmap
+### [2.0.0] - 2026-04-08
 
-### v1.1.0 (计划中)
-- [ ] 支持 Figma 设计平台
-- [ ] 支持 Sketch 文件解析
-- [ ] 增加 Web 管理界面
+#### ⚡ Breaking Changes
+- **Tools merged from 6 to 3**: `lanhu_design` (replaces list_designs + analyze_designs + get_slices), `lanhu_page` (replaces list_pages + analyze_pages), `lanhu_resolve_invite` (unchanged)
+- Design analysis now uses `mode` parameter instead of separate tools
+- Default output no longer includes base64 images (use `include: ["image"]` to opt in)
 
-### v1.2.0 (计划中)
-- [ ] AI 辅助工时估算
-- [ ] 技术栈智能推荐
-- [ ] API 文档自动生成
-- [ ] 前后端工作量分析
+#### ✨ Added
+- **Structured Design Tokens**: Extracts all colors, fonts, shadows, borders, border radii — sorted by usage frequency
+- **Artboard format support**: Correctly reads `text.style.font` path for font extraction in artboard-format Sketch JSON
+- **Concurrent processing**: Multiple designs analyzed in parallel (5 concurrent) with automatic retry
+- **MCP Resources**: `project-designs` resource template for design list discovery
+- **MCP Prompts**: `frontend-dev` and `design-review` built-in prompt templates
+- **Output control**: `include` parameter in analyze mode for selective output (html, image, tokens, layout, layers, slices)
 
-### v2.0.0 (计划中)
-- [ ] 企业级权限管理
-- [ ] 多租户支持
-- [ ] 审计日志
-- [ ] 性能监控和告警
-- [ ] 国际化支持（更多语言）
+#### 🐛 Fixed
+- Font data missing from artboard-format Sketch JSON (was reading wrong path `textStyle.font` instead of `text.style.font`)
+- Layer coordinates all zero in artboard format (was reading `frame.x/y` instead of `frame.left/top`)
+- Invalid color values (containing `undefined`/`NaN`) no longer appear in design tokens
 
 ---
 

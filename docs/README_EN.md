@@ -52,7 +52,12 @@ A powerful [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) serv
 - **Sketch Annotation Fallback**: When Schema is unavailable, auto-extract full annotations from Sketch JSON
 - **Design Structure Tree**: Extract full design hierarchy from Sketch/XD JSON
 - **Slice Extraction**: Auto-identify and export design slices and icon assets
-- **Design Tokens**: Auto-extract colors, fonts, gradients, shadows
+- **Structured Design Tokens**: Extract all colors, font families/sizes/weights, shadows, borders, border radii — sorted by usage frequency
+
+### ⚡ Performance & Integration
+- **Concurrent Processing**: Multiple designs analyzed in parallel (5 concurrent) with automatic retry
+- **MCP Resources**: Design lists exposed as MCP Resource templates for discovery
+- **MCP Prompts**: Built-in `frontend-dev` and `design-review` prompt templates
 
 ---
 
@@ -63,67 +68,57 @@ A powerful [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) serv
 - **Node.js 20+** (required)
 - Lanhu account and Cookie (required)
 
-### 1. Install
+> 💡 Get Cookie: Log in to [Lanhu web](https://lanhuapp.com), open browser DevTools (F12), copy Cookie from request headers. See [GET-COOKIE-TUTORIAL.md](GET-COOKIE-TUTORIAL.md) for details.
+
+### Zero-Install (npx)
+
+No cloning or building needed. Just configure your AI client:
+
+**Cursor / Windsurf** (`.cursor/mcp.json` or `.windsurf/mcp.json`):
+```json
+{
+  "mcpServers": {
+    "lanhu": {
+      "command": "npx",
+      "args": ["-y", "mcp-lanhu"],
+      "env": { "LANHU_COOKIE": "your_cookie_here" }
+    }
+  }
+}
+```
+
+**Claude Desktop** (`claude_desktop_config.json`):
+```json
+{
+  "mcpServers": {
+    "lanhu": {
+      "command": "npx",
+      "args": ["-y", "mcp-lanhu"],
+      "env": { "LANHU_COOKIE": "your_cookie_here" }
+    }
+  }
+}
+```
+
+**Claude Code**:
+```bash
+claude mcp add lanhu -- npx -y mcp-lanhu
+```
+
+### Local Development
 
 ```bash
 git clone https://github.com/MrDgbot/lanhu-mcp.git
 cd lanhu-mcp
 npm install
 npm run build
+npm start
 ```
-
-### 2. Configure
-
-```bash
-cp config.example.env .env
-# Edit .env and set your Lanhu Cookie
-```
-
-Required environment variables:
 
 | Variable | Description | Required |
 |----------|-------------|----------|
-| `LANHU_COOKIE` | Lanhu web Cookie | ✅ |
+| `LANHU_COOKIE` | Lanhu web Cookie | Yes |
 | `DDS_COOKIE` | DDS Cookie (defaults to LANHU_COOKIE) | No |
-
-> 💡 Get Cookie: Log in to [Lanhu web](https://lanhuapp.com), open browser DevTools (F12), copy Cookie from request headers
-
-### 3. Run
-
-```bash
-# Development mode (auto-reload)
-npm run dev
-
-# Production mode
-npm run build && npm start
-```
-
-### 4. Connect AI Client
-
-The server uses **stdio transport**. Configure in your AI client:
-
-**Cursor** (`.cursor/mcp.json`):
-```json
-{
-  "mcpServers": {
-    "lanhu": {
-      "command": "node",
-      "args": ["dist/server.js"],
-      "cwd": "/path/to/lanhu-mcp",
-      "env": {
-        "LANHU_COOKIE": "your_cookie_here"
-      }
-    }
-  }
-}
-```
-
-### Docker
-
-```bash
-docker build -t lanhu-mcp .
-docker run -e LANHU_COOKIE="your_cookie" lanhu-mcp
-```
 
 ---
 
@@ -153,14 +148,29 @@ Download all slices from "Homepage Design"
 
 ## 🛠️ Available Tools
 
-| Tool | Description |
+### `lanhu_design` — Design Analysis
+
+Unified design tool with `mode` parameter:
+
+| Mode | Description |
 |------|-------------|
-| `lanhu_resolve_invite_link` | Parse invite/share links |
-| `lanhu_list_pages` | Get PRD/prototype page list |
-| `lanhu_analyze_pages` | Analyze prototype page content |
-| `lanhu_list_designs` | Get UI design list |
-| `lanhu_analyze_designs` | Analyze UI designs (HTML+CSS + Design Tokens) |
-| `lanhu_get_slices` | Get slice/asset info |
+| `list` | List all design images in a project |
+| `analyze` | Design → HTML + CSS + Design Tokens (default) |
+| `tokens` | Extract design tokens only (fonts, colors, shadows) |
+| `slices` | Extract icon & image assets for download |
+
+The `analyze` mode supports an `include` parameter to control output: `html`, `image`, `tokens`, `layout`, `layers`, `slices`. Default: `["html", "tokens"]`.
+
+### `lanhu_page` — PRD / Prototype Analysis
+
+| Mode | Description |
+|------|-------------|
+| `list` | List all pages in a PRD document |
+| `analyze` | PRD / Axure → Structured analysis (default) |
+
+### `lanhu_resolve_invite` — Resolve Invite Links
+
+Parse Lanhu invite/share links into usable project URLs.
 
 ---
 
@@ -180,7 +190,6 @@ lanhu-mcp/
 ├── package.json                  # Dependencies
 ├── tsconfig.json                 # TypeScript config
 ├── config.example.env            # Environment template
-├── Dockerfile                    # Docker image
 └── README.md
 ```
 

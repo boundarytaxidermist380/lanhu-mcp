@@ -22,8 +22,8 @@ Thank you for your interest in the Lanhu MCP Server project! We welcome all form
 - **实际行为**：实际发生了什么
 - **环境信息**：
   - 操作系统和版本
-  - Python 版本
-  - 依赖版本（从 `pip list` 获取）
+  - Node.js 版本
+  - npm / npx 版本
 - **相关日志**：错误堆栈或日志信息
 - **截图**（如适用）
 
@@ -50,13 +50,8 @@ cd lanhu-mcp
 # 3. 添加上游仓库
 git remote add upstream https://github.com/MrDgbot/lanhu-mcp.git
 
-# 4. 创建虚拟环境
-python -m venv venv
-source venv/bin/activate  # Windows: venv\Scripts\activate
-
-# 5. 安装开发依赖
-pip install -r requirements.txt
-pip install black flake8 pytest pytest-cov
+# 4. 安装依赖
+npm install
 ```
 
 **开发流程：**
@@ -68,14 +63,14 @@ git checkout -b feature/your-feature-name
 # 2. 进行开发
 # ... 编写代码 ...
 
-# 3. 代码格式化
-black lanhu_mcp_server.py
+# 3. 类型检查
+npm run check
 
-# 4. 代码检查
-flake8 lanhu_mcp_server.py --max-line-length=120
+# 4. 运行测试
+npm test
 
-# 5. 运行测试（如果有）
-pytest tests/ -v
+# 5. 构建验证
+npm run build
 
 # 6. 提交更改
 git add .
@@ -105,44 +100,36 @@ git push origin feature/your-feature-name
 feat: add support for Figma design import
 fix: resolve cache invalidation issue when version changes
 docs: update README with new configuration options
-refactor: extract message store logic into separate class
+refactor: extract design token logic into separate module
 ```
 
 ### 📋 代码规范
 
-#### Python 代码风格
+#### TypeScript 代码风格
 
-- 遵循 [PEP 8](https://www.python.org/dev/peps/pep-0008/) 规范
-- 使用 Black 进行自动格式化（行长度 120）
-- 函数和类必须有文档字符串（docstring）
+- 使用 TypeScript strict 模式
+- 使用 `npm run check`（`tsc --noEmit`）进行类型检查
+- 函数和接口使用 JSDoc 注释说明用途
 - 复杂逻辑需要添加注释
 
 **示例：**
 
-```python
-async def fetch_metadata(url: str, use_cache: bool = True) -> dict:
-    """
-    从蓝湖URL获取元数据
-
-    Args:
-        url: 蓝湖文档URL
-        use_cache: 是否使用缓存，默认为True
-
-    Returns:
-        包含元数据的字典
-
-    Raises:
-        ValueError: URL格式不正确时抛出
-    """
-    # 实现代码...
+```typescript
+/** 从蓝湖 URL 获取元数据 */
+async function fetchMetadata(url: string, useCache = true): Promise<DesignMeta> {
+  if (!url.includes('lanhuapp.com')) {
+    throw new Error(`Invalid Lanhu URL: ${url}`);
+  }
+  // 实现代码...
+}
 ```
 
 #### 命名约定
 
-- 类名：`PascalCase` (例如：`MessageStore`, `LanhuExtractor`)
-- 函数名：`snake_case` (例如：`get_pages_list`, `send_notification`)
-- 常量：`UPPER_CASE` (例如：`BASE_URL`, `DEFAULT_COOKIE`)
-- 私有成员：前缀 `_` (例如：`_load_cache`, `_metadata_cache`)
+- 类名 / 接口名 / 类型名：`PascalCase`（例如：`DesignToken`, `SketchLayer`）
+- 函数名 / 变量名：`camelCase`（例如：`getPagesList`, `designTokens`）
+- 常量：`UPPER_CASE`（例如：`BASE_URL`, `DEFAULT_TIMEOUT`）
+- 文件名：`camelCase.ts`（例如：`designTools.ts`, `sketchParser.ts`）
 
 #### 错误处理
 
@@ -150,37 +137,42 @@ async def fetch_metadata(url: str, use_cache: bool = True) -> dict:
 - 提供有意义的错误消息
 - 记录错误日志
 
-```python
-try:
-    response = await self.client.get(url)
-    response.raise_for_status()
-except httpx.HTTPStatusError as e:
-    logger.error(f"HTTP error occurred: {e}")
-    raise ValueError(f"Failed to fetch data from {url}: {e.response.status_code}")
+```typescript
+try {
+  const response = await fetch(url);
+  if (!response.ok) {
+    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+  }
+  return await response.json();
+} catch (error) {
+  console.error(`Failed to fetch data from ${url}:`, error);
+  throw error;
+}
 ```
 
 ### 🧪 测试
 
 如果您添加了新功能，请编写相应的测试：
 
-```python
-# tests/test_message_store.py
-import pytest
-from lanhu_mcp_server import MessageStore
+```typescript
+// tests-ts/example.test.ts
+import { describe, it, expect } from 'vitest';
+import { parseDesignUrl } from '../src/lanhu/urlParser';
 
-def test_save_message():
-    """测试消息保存功能"""
-    store = MessageStore("test_project")
-    msg = store.save_message(
-        summary="Test message",
-        content="Test content",
-        author_name="Test User",
-        author_role="Developer"
-    )
+describe('parseDesignUrl', () => {
+  it('should extract project ID from design URL', () => {
+    const url = 'https://lanhuapp.com/web/#/item/project/stage?tid=xxx&pid=123';
+    const result = parseDesignUrl(url);
+    expect(result.pid).toBe('123');
+  });
+});
+```
 
-    assert msg["id"] == 1
-    assert msg["summary"] == "Test message"
-    assert msg["author_name"] == "Test User"
+运行测试：
+
+```bash
+npm test              # 运行所有测试
+npm test -- --watch   # 监听模式
 ```
 
 ### 📖 文档
@@ -188,7 +180,7 @@ def test_save_message():
 如果您更改了 API 或添加了新功能，请更新相关文档：
 
 - 更新 README.md
-- 更新工具的 docstring
+- 更新工具的 JSDoc 注释
 - 添加使用示例
 - 更新英文文档（docs/README_EN.md）
 
@@ -196,7 +188,8 @@ def test_save_message():
 
 所有 Pull Request 都需要经过代码审查。请确保：
 
-- ✅ 代码通过所有 CI 检查
+- ✅ 代码通过类型检查（`npm run check`）
+- ✅ 测试通过（`npm test`）
 - ✅ 遵循项目代码规范
 - ✅ 有完整的提交信息
 - ✅ 有相关的测试（如适用）
@@ -226,8 +219,8 @@ If you find a bug, please submit it through [GitHub Issues](https://github.com/M
 - **Actual Behavior**: What actually happened
 - **Environment Info**:
   - OS and version
-  - Python version
-  - Dependencies versions (from `pip list`)
+  - Node.js version
+  - npm / npx version
 - **Related Logs**: Error stack or log information
 - **Screenshots** (if applicable)
 
@@ -254,13 +247,8 @@ cd lanhu-mcp
 # 3. Add upstream repository
 git remote add upstream https://github.com/MrDgbot/lanhu-mcp.git
 
-# 4. Create virtual environment
-python -m venv venv
-source venv/bin/activate  # Windows: venv\Scripts\activate
-
-# 5. Install development dependencies
-pip install -r requirements.txt
-pip install black flake8 pytest pytest-cov
+# 4. Install dependencies
+npm install
 ```
 
 **Development Workflow:**
@@ -272,14 +260,14 @@ git checkout -b feature/your-feature-name
 # 2. Develop
 # ... write code ...
 
-# 3. Format code
-black lanhu_mcp_server.py
+# 3. Type check
+npm run check
 
-# 4. Code linting
-flake8 lanhu_mcp_server.py --max-line-length=120
+# 4. Run tests
+npm test
 
-# 5. Run tests (if available)
-pytest tests/ -v
+# 5. Build verification
+npm run build
 
 # 6. Commit changes
 git add .
@@ -306,23 +294,28 @@ We follow [Conventional Commits](https://www.conventionalcommits.org/):
 
 ### 📋 Code Standards
 
-#### Python Code Style
+#### TypeScript Code Style
 
-- Follow [PEP 8](https://www.python.org/dev/peps/pep-0008/)
-- Use Black for auto-formatting (line length 120)
-- Functions and classes must have docstrings
+- Use TypeScript strict mode
+- Run `npm run check` (`tsc --noEmit`) for type checking
+- Use JSDoc comments for functions and interfaces
 - Add comments for complex logic
 
 #### Naming Conventions
 
-- Class names: `PascalCase` (e.g., `MessageStore`, `LanhuExtractor`)
-- Function names: `snake_case` (e.g., `get_pages_list`, `send_notification`)
-- Constants: `UPPER_CASE` (e.g., `BASE_URL`, `DEFAULT_COOKIE`)
-- Private members: prefix `_` (e.g., `_load_cache`, `_metadata_cache`)
+- Classes / Interfaces / Types: `PascalCase` (e.g., `DesignToken`, `SketchLayer`)
+- Functions / Variables: `camelCase` (e.g., `getPagesList`, `designTokens`)
+- Constants: `UPPER_CASE` (e.g., `BASE_URL`, `DEFAULT_TIMEOUT`)
+- File names: `camelCase.ts` (e.g., `designTools.ts`, `sketchParser.ts`)
 
 ### 🧪 Testing
 
-If you add new features, please write corresponding tests.
+If you add new features, please write corresponding tests using Vitest.
+
+```bash
+npm test              # Run all tests
+npm test -- --watch   # Watch mode
+```
 
 ### 📖 Documentation
 
@@ -346,6 +339,4 @@ If you have any questions, feel free to:
 - Join our community chat (if available)
 - Email us at: youngjimmy8305@gmail.com
 
-Thank you for contributing! 🎉
-
-<!-- Last checked: 2026-03-31 08:56 -->
+Thank you for contributing!

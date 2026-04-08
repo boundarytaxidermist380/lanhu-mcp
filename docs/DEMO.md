@@ -240,32 +240,33 @@ https://lanhuapp.com/web/#/item/project/stage?tid=xxx&pid=xxx
 
 ## 快速体验
 
-想亲自体验？只需 3 步：
+想亲自体验？无需 clone 代码，只需在 AI 客户端中配置即可：
 
-```bash
-# 1. 克隆项目
-git clone https://github.com/yourusername/lanhu-mcp-server.git
+**Cursor / Windsurf**（编辑 `.cursor/mcp.json` 或 `.windsurf/mcp.json`）：
 
-# 2. 快速启动
-cd lanhu-mcp-server
-./scripts/quickstart.sh  # Mac/Linux
-# 或 scripts\quickstart.bat  # Windows
-
-# 3. 配置 Cursor
-# 在 MCP 配置中添加（建议使用英文参数）：
+```json
 {
   "mcpServers": {
     "lanhu": {
-      "url": "http://localhost:8000/mcp?role=Developer&name=YourName"
+      "command": "npx",
+      "args": ["-y", "mcp-lanhu"],
+      "env": { "LANHU_COOKIE": "your_cookie_here" }
     }
   }
 }
-# 注意：部分 AI 工具不支持 URL 中文参数
 ```
+
+**Claude Code**：
+
+```bash
+claude mcp add lanhu -- npx -y mcp-lanhu
+```
+
+> 💡 获取 Cookie：登录 [蓝湖](https://lanhuapp.com) → 浏览器 F12 → Network → 复制请求头中的 Cookie
 
 开始对话：
 ```
 帮我看看这个需求文档：[粘贴蓝湖URL]
 ```
 
-就是这么简单！🎉
+就是这么简单！
